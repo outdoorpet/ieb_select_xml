@@ -1,6 +1,7 @@
 from PyQt4 import QtGui
 from obspy.clients.fdsn import Client
 from obspy.core.event import Catalog
+from obspy.clients.fdsn.header import FDSNException
 import pandas as pd
 import os
 
@@ -43,11 +44,21 @@ class MainWindow(QtGui.QWidget):
     def make_xml(self):
         client = Client("IRIS")
         cat = Catalog() # empty earthquake catalogue
+        print('')
 
         # Method to retrieve events from IRIS based on event ID and create an xml file
         for event_id in self.ieb_events['IRIS ID']:
-            cat.append(client.get_events(eventid=event_id)[0])
+            try:
+                print('Requesting Information for event: '+ str(event_id))
+                IRIS_event = client.get_events(eventid=int(event_id))[0]
+                cat.append(IRIS_event)
+            except FDSNException:
+                print('')
+                print('Error!!: No Event Information for '+ str(event_id))
 
+
+        print('')
+        print("Resulting Earthquake Catalogue:")
         print(cat)
         new_filename = os.path.splitext(self.ieb_filename)[0]+'.xml'
         cat.write(filename=new_filename, format="QUAKEML")
