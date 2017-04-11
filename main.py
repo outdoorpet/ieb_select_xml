@@ -35,7 +35,9 @@ class MainWindow(QtGui.QWidget):
             return
 
         # open the text file containing earthquakes with pandas
-        self.ieb_events = pd.read_table(self.ieb_filename, header=0)
+        self.ieb_events = pd.read_table(self.ieb_filename, header=0, names=['Year','Month','Day','Time_UTC','Mag',
+                                                                            'Lat','Lon','Depth_km','Region','IRIS_ID',
+                                                                            'Timestamp'])
 
         print(self.ieb_events)
 
@@ -47,7 +49,7 @@ class MainWindow(QtGui.QWidget):
         print('')
 
         # Method to retrieve events from IRIS based on event ID and create an xml file
-        for event_id in self.ieb_events['IRIS ID']:
+        for event_id in self.ieb_events['IRIS_ID']:
             try:
                 print('Requesting Information for event: '+ str(event_id))
                 IRIS_event = client.get_events(eventid=int(event_id))[0]
@@ -62,10 +64,6 @@ class MainWindow(QtGui.QWidget):
         print(cat)
         new_filename = os.path.splitext(self.ieb_filename)[0]+'.xml'
         cat.write(filename=new_filename, format="QUAKEML")
-
-
-
-
 
 if __name__ == '__main__':
     app = QtGui.QApplication([])
